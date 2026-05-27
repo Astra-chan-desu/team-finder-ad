@@ -2,12 +2,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
+    email = models.EmailField(unique=True)
+
     about = models.TextField('О себе', blank=True, max_length=500)
     avatar = models.ImageField('Аватар', upload_to='avatars/', blank=True, null=True)
     phone = models.CharField('Телефон', max_length=20, blank=True)
     github_url = models.URLField('GitHub', blank=True)
-
     skills = models.ManyToManyField('Skill', blank=True, related_name='users', verbose_name='Навыки')
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     @property
     def name(self):
