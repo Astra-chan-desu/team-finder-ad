@@ -89,22 +89,14 @@ class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class ProjectCompleteView(LoginRequiredMixin, View):
-    """Завершить проект (статус 'closed')"""
+    """Завершить проект (AJAX-ответ)"""
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
         if request.user != project.owner and not request.user.is_staff:
             return HttpResponseForbidden()
         project.status = 'closed'
         project.save()
-        return JsonResponse({
-            'status': 'ok',
-            'reload': True,
-            'redirect_url': reverse('projects:detail', kwargs={'pk': pk})
-        })
-
-    def get(self, request, pk):
-        return self.post(request, pk)
-    
+        return JsonResponse({'status': 'ok'})
     
 @method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(login_required, name='dispatch')

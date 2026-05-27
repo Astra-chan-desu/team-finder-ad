@@ -30,7 +30,10 @@ class CustomUserCreationForm(forms.ModelForm):
     def clean_password(self):
         password = self.cleaned_data.get('password')
         if password:
-            validate_password(password)
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                self.add_error('password', e)
         return password
 
     def save(self, commit=True):

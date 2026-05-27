@@ -1,9 +1,27 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+class UserManager(BaseUserManager):
+    """Менеджер, где email используется как уникальный идентификатор."""
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email обязателен')
+        email = self.normalize_email(email)
+        # username делаем равным email (поле всё ещё существует в AbstractUser)
+        extra_fields.setdefault('username', email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
 class User(AbstractUser):
+    objects = UserManager()
     email = models.EmailField(unique=True)
-
     about = models.TextField('О себе', blank=True, max_length=500)
     avatar = models.ImageField('Аватар', upload_to='avatars/', blank=True, null=True)
     phone = models.CharField('Телефон', max_length=20, blank=True)

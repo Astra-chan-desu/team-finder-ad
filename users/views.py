@@ -22,7 +22,20 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.contrib.auth.views import PasswordChangeView as AuthPasswordChangeView
 from django.urls import reverse_lazy
+from django.contrib.auth.views import LogoutView as BaseLogoutView
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 
+from django.contrib.auth.views import LogoutView as BaseLogoutView
+from django.contrib.auth import logout as auth_logout
+from django.shortcuts import redirect
+
+
+class LogoutView(BaseLogoutView):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    
 @method_decorator(login_required, name='dispatch')
 class EditProfileRedirectView(View):
     def get(self, request):
@@ -58,10 +71,15 @@ class UserListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['all_skills'] = Skill.objects.all()
-        context['active_skill'] = self.active_skill if hasattr(self, 'active_skill') else None
+        if self.active_skill:
+            try:
+                skill_obj = Skill.objects.get(name=self.active_skill)
+            except Skill.DoesNotExist:
+                skill_obj = None
+            context['active_skill'] = skill_obj
+        else:
+            context['active_skill'] = None
         return context
-    
-    
 class SkillSearchView(View):
     """Автодополнение навыков (GET /users/skills/?q=...)"""
     def get(self, request):
@@ -129,3 +147,7 @@ class PasswordChangeView(AuthPasswordChangeView):
 
     def get_success_url(self):
         return reverse_lazy('users:profile', kwargs={'pk': self.request.user.pk})
+    
+def logout_view(request):
+    auth_logout(request)
+    return redirect('/')
