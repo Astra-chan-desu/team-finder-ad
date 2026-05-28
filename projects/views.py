@@ -4,8 +4,8 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required      
- 
+from django.contrib.auth.decorators import login_required
+
 from django.utils.decorators import method_decorator
 from django.urls import reverse
 
@@ -15,45 +15,46 @@ from .forms import ProjectForm
 
 class ProjectListView(ListView):
     model = Project
-    template_name = 'projects/project_list.html'
-    context_object_name = 'projects'
+    template_name = "projects/project_list.html"
+    context_object_name = "projects"
     paginate_by = 12
-    ordering = ['-created_at']
+    ordering = ["-created_at"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            context['favorite_project_ids'] = list(
-                Favorite.objects.filter(user=self.request.user)
-                .values_list('project_id', flat=True)
+            context["favorite_project_ids"] = list(
+                Favorite.objects.filter(user=self.request.user).values_list(
+                    "project_id", flat=True
+                )
             )
         return context
 
 
 class ProjectDetailView(DetailView):
     model = Project
-    template_name = 'projects/project-details.html'
-    context_object_name = 'project'
+    template_name = "projects/project-details.html"
+    context_object_name = "project"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         project = self.object
         user = self.request.user
         if user.is_authenticated:
-            context['is_participant'] = project.participants.filter(pk=user.pk).exists()
-            context['is_favorite'] = Favorite.objects.filter(
+            context["is_participant"] = project.participants.filter(pk=user.pk).exists()
+            context["is_favorite"] = Favorite.objects.filter(
                 user=user, project=project
             ).exists()
         else:
-            context['is_participant'] = False
-            context['is_favorite'] = False
+            context["is_participant"] = False
+            context["is_favorite"] = False
         return context
 
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectForm
-    template_name = 'projects/create-project.html'
+    template_name = "projects/create-project.html"
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -63,17 +64,17 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_edit'] = False
+        context["is_edit"] = False
         return context
 
     def get_success_url(self):
-        return reverse('projects:detail', kwargs={'pk': self.object.pk})
+        return reverse("projects:detail", kwargs={"pk": self.object.pk})
 
 
 class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Project
     form_class = ProjectForm
-    template_name = 'projects/create-project.html'
+    template_name = "projects/create-project.html"
 
     def test_func(self):
         project = self.get_object()
@@ -81,27 +82,30 @@ class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_edit'] = True
+        context["is_edit"] = True
         return context
 
     def get_success_url(self):
-        return reverse('projects:detail', kwargs={'pk': self.object.pk})
+        return reverse("projects:detail", kwargs={"pk": self.object.pk})
 
 
 class ProjectCompleteView(LoginRequiredMixin, View):
     """Завершить проект (AJAX-ответ)"""
+
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
         if request.user != project.owner and not request.user.is_staff:
             return HttpResponseForbidden()
-        project.status = 'closed'
+        project.status = "closed"
         project.save()
-        return JsonResponse({'status': 'ok'})
-    
-@method_decorator(csrf_exempt, name='dispatch')
-@method_decorator(login_required, name='dispatch')
+        return JsonResponse({"status": "ok"})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class ToggleParticipateView(View):
     """Присоединиться / выйти из проекта (AJAX)"""
+
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
         user = request.user
@@ -111,35 +115,39 @@ class ToggleParticipateView(View):
         else:
             project.participants.add(user)
             participant = True
-        return JsonResponse({'status': 'ok', 'participant': participant})
+        return JsonResponse({"status": "ok", "participant": participant})
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-@method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class FavoriteAddView(View):
     """Добавить проект в избранное (AJAX)"""
+
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
         _, created = Favorite.objects.get_or_create(user=request.user, project=project)
-        return JsonResponse({'status': 'ok', 'action': 'added' if created else 'already_exists'})
+        return JsonResponse(
+            {"status": "ok", "action": "added" if created else "already_exists"}
+        )
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-@method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class FavoriteRemoveView(View):
     """Удалить проект из избранного (AJAX)"""
+
     def post(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
         Favorite.objects.filter(user=request.user, project=project).delete()
-        return JsonResponse({'status': 'ok', 'action': 'removed'})
+        return JsonResponse({"status": "ok", "action": "removed"})
 
 
 class FavoriteListView(LoginRequiredMixin, ListView):
-    template_name = 'projects/favorite_projects.html'
-    context_object_name = 'projects'
+    template_name = "projects/favorite_projects.html"
+    context_object_name = "projects"
     paginate_by = 12
 
     def get_queryset(self):
-        return Project.objects.filter(
-            favorited_by__user=self.request.user
-        ).order_by('-created_at')
+        return Project.objects.filter(favorited_by__user=self.request.user).order_by(
+            "-created_at"
+        )

@@ -8,35 +8,67 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Favorite',
+            name="Favorite",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Избранное',
-                'verbose_name_plural': 'Избранные',
+                "verbose_name": "Избранное",
+                "verbose_name_plural": "Избранные",
             },
         ),
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Название')),
-                ('description', models.TextField(verbose_name='Описание')),
-                ('status', models.CharField(choices=[('open', 'Открытый'), ('closed', 'Закрытый')], default='open', max_length=10, verbose_name='Статус')),
-                ('github_url', models.URLField(blank=True, verbose_name='GitHub проекта')),
-                ('created_at', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Дата публикации')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Название")),
+                ("description", models.TextField(verbose_name="Описание")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("open", "Открытый"), ("closed", "Закрытый")],
+                        default="open",
+                        max_length=10,
+                        verbose_name="Статус",
+                    ),
+                ),
+                (
+                    "github_url",
+                    models.URLField(blank=True, verbose_name="GitHub проекта"),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now,
+                        verbose_name="Дата публикации",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Проект',
-                'verbose_name_plural': 'Проекты',
-                'ordering': ['-created_at'],
+                "verbose_name": "Проект",
+                "verbose_name_plural": "Проекты",
+                "ordering": ["-created_at"],
             },
         ),
     ]

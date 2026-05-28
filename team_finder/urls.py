@@ -2,13 +2,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from projects.views import ProjectListView  
+from projects.views import ProjectListView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', ProjectListView.as_view(), name='home'),          
-    path('users/', include('users.urls')),               
-    path('projects/', include('projects.urls')),               
+    path("admin/", admin.site.urls),
+    path("", ProjectListView.as_view(), name="home"),
+    path("users/", include("users.urls")),
+    path("projects/", include("projects.urls")),
 ]
 
 if settings.DEBUG:

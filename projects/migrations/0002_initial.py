@@ -10,33 +10,47 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('projects', '0001_initial'),
+        ("projects", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='favorite',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to=settings.AUTH_USER_MODEL),
+            model_name="favorite",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="favorites",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='project',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owned_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="owned_projects",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='project',
-            name='participants',
-            field=models.ManyToManyField(blank=True, related_name='participants', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="participants",
+            field=models.ManyToManyField(
+                blank=True, related_name="participants", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='favorite',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorited_by', to='projects.project'),
+            model_name="favorite",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="favorited_by",
+                to="projects.project",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='favorite',
-            unique_together={('user', 'project')},
+            name="favorite",
+            unique_together={("user", "project")},
         ),
     ]
